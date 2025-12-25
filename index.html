@@ -1,122 +1,633 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Simple Blog</title>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        header {
-            background-color: #C0C0C0;
-            padding: 10px 0;
-            text-align: center;
-        }
-        header img {
-            width: 200px;
-            height: 200px;
-            border-radius: 15%;
-            display: block;
-            margin: 0 auto 10px;
-        }
-        header h1 {
-            margin: 0;
-        }
-        nav {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #444;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        .container {
-            width: 80%;
-            margin: 20px auto;
-        }
-        .post {
-            background: white;
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .post h2 {
-            margin-top: 0;
-        }
-        footer {
-            background-color: #C0C0C0;
-            text-align: center;
-            padding: 10px 0;
-            margin-top: 20px;
-        }
-        .social-icons {
-            margin: 10px;
-            font-size: 36px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blog.exe</title>
+  <style>
+    :root{
+      --bg: #070a07;
+      --panel: #0b120b;
+      --text: #b7ffb7;
+      --muted: #7ddf7d;
+      --hot: #00ff66;
+      --warn: #ffcc66;
+      --border: rgba(183,255,183,.18);
+      --shadow: rgba(0,255,102,.12);
+      --scan: rgba(255,255,255,.04);
+      --glow: 0 0 14px rgba(0,255,102,.25);
+      --font: "Courier New", Courier, monospace;
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      background: radial-gradient(1200px 700px at 30% 10%, rgba(0,255,102,.10), transparent 55%),
+                  radial-gradient(900px 600px at 70% 80%, rgba(0,255,102,.08), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      letter-spacing: .2px;
+    }
+
+    /* CRT overlay */
+    .crt::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 2px,
+          var(--scan) 3px
+        );
+      mix-blend-mode: overlay;
+      opacity: .75;
+      z-index: 50;
+    }
+    .crt::after{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,.35) 70%, rgba(0,0,0,.65) 100%);
+      z-index: 51;
+    }
+
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(7,10,7,.92), rgba(7,10,7,.72));
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .topbar{
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .brand{
+      display:flex;
+      gap: 10px;
+      align-items: baseline;
+      text-shadow: var(--glow);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brand .logo{
+      color: var(--hot);
+      font-weight: 700;
+    }
+    .brand .hint{
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .controls{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap: wrap;
+    }
+
+    .input, .select, .btn{
+      border: 1px solid var(--border);
+      background: rgba(11,18,11,.65);
+      color: var(--text);
+      padding: 8px 10px;
+      font-family: var(--font);
+      outline: none;
+      box-shadow: 0 0 0 2px transparent;
+    }
+    .input:focus, .select:focus, .btn:focus{
+      box-shadow: 0 0 0 2px rgba(0,255,102,.18);
+    }
+    .input{
+      width: min(360px, 60vw);
+    }
+    .btn{
+      cursor:pointer;
+      text-shadow: var(--glow);
+    }
+    .btn:hover{
+      border-color: rgba(0,255,102,.35);
+      box-shadow: 0 0 18px var(--shadow);
+    }
+    .btn:active{
+      transform: translateY(1px);
+    }
+
+    main .grid{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 900px){
+      main .grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      border: 1px solid var(--border);
+      background: rgba(11,18,11,.55);
+      box-shadow: 0 0 22px rgba(0,255,102,.06);
+    }
+
+    .panel .titlebar{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to bottom, rgba(0,255,102,.08), rgba(0,0,0,0));
+      font-size: 13px;
+    }
+
+    .titlebar .dots{
+      display:flex;
+      gap: 6px;
+      opacity:.8;
+    }
+    .dot{
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.25);
+    }
+
+    .list{
+      padding: 6px;
+      max-height: 70vh;
+      overflow:auto;
+    }
+
+    .item{
+      display:block;
+      width:100%;
+      text-align:left;
+      padding: 10px 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font);
+      cursor:pointer;
+    }
+    .item:hover{
+      border-color: rgba(0,255,102,.22);
+      background: rgba(0,255,102,.04);
+    }
+    .item.active{
+      border-color: rgba(0,255,102,.40);
+      background: rgba(0,255,102,.07);
+      box-shadow: inset 0 0 0 1px rgba(0,255,102,.10);
+    }
+
+    .item .meta{
+      display:flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .tags{
+      display:flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .tag{
+      font-size: 11px;
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: rgba(0,0,0,.18);
+    }
+
+    article{
+      padding: 14px 14px 18px;
+    }
+    article h1{
+      margin: 0 0 6px;
+      font-size: 18px;
+      color: var(--hot);
+      text-shadow: var(--glow);
+      letter-spacing: .6px;
+    }
+    article .sub{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .hr{
+      border-top: 1px dashed rgba(183,255,183,.25);
+      margin: 12px 0;
+    }
+
+    pre{
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .status{
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .blink{
+      animation: blink 1s steps(1) infinite;
+      display:inline-block;
+      width: 10px;
+      margin-left: 2px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    a{ color: var(--warn); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+
+    /* optional tiny flicker */
+    @media (prefers-reduced-motion: no-preference){
+      .flicker{
+        animation: flicker 5.5s infinite;
+      }
+      @keyframes flicker{
+        0%, 100% { opacity: 1; }
+        30% { opacity: .98; }
+        31% { opacity: 1; }
+        60% { opacity: .99; }
+        61% { opacity: 1; }
+      }
+    }
+
+    /* PROFILE PANEL */
+    .profile{
+      display: flex;
+      gap: 16px;
+      padding: 14px;
+      align-items: center;
+    }
+    .avatar{
+      width: 96px;
+      height: 96px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: #000;
+      image-rendering: pixelated;
+      box-shadow: 0 0 14px rgba(0,255,102,.15);
+    }
+    .profile-text{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+    .profile-text .name{
+      color: var(--hot);
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-shadow: var(--glow);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-text .tagline{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .socials{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .socials a{
+      font-size: 12px;
+      padding: 3px 6px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.25);
+      color: var(--warn);
+    }
+    .socials a:hover{
+      border-color: rgba(0,255,102,.4);
+      box-shadow: 0 0 10px rgba(0,255,102,.2);
+      text-decoration: none;
+    }
+  </style>
 </head>
-<body>
 
-<header>
-    <img src="5950-1490.png" alt="My Photo">
-    <div class="social-icons">
-        <a href="https://www.linkedin.com/in/petar-georgiev-752a55284/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
-        <a href="https://twitter.com/UserPetar" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
-        <a href="mailto:petar@georgiev.cloud"><i class="fa-solid fa-envelope"></i></a>
-    </div>
-    <h1>Petar Georgiev</h1>
-</header>
-<div class="container">
-    <div class="post">
-        <h2>Тук и сега</h2>
-        <p style="font-size: 8px;">Posted on 22nd May 2025</p>
-        <p>Ставам сутрин и вече бързам. Бързам към дестинация, която не съществува. Вечно подвижна цел, която, колкото по-близо доближавам, толкова по-надалеч се измества. Да имам, да притежавам, да получавам - повече, по-много, по-често. Да усещам изобилие, което някак винаги остава недостатъчно.  </p>
-        <p>На излизане синът ми застава пред мен. Прекрасно създание, ухаещо на живот, изпълнено с любов. Магическа любов, способна да излекува всичко. Любов, която спира времето и изпълва всеки миг със смисъл. Прегръщам го, стискам го силно до себе си и попивам от еликсира му. Вдишвам дълбоко, опитвайки се да задържа в себе си аромата на живот.
-Пускам го, а пред мен е жена ми. Все така прекрасна, всеотдайна и топла. Тя винаги е там, винаги готова да подаде ръка, винаги подкрепяща. Но аз вече съм свикнал. Приел съм нейното присъствие за даденост и сякаш все по-трудно усещам истинската стойност на онова, което тя ми дава. Какво всъщност означава това за мен? Мога ли да си представя живота без тази нейната безрезервна обич и отдаденост?</p>
-        <p>Но аз нямам време да размишлявам - трябва да бързам. Да постигам повече, по-бързо, по-често. Мечтите ми се подреждат една след друга, а времето става все по-малко, все по-оскъдно. И аз тичам напред от изгрев до залез, всеки ден, всеки миг.</p>
-        <p>Вечно разбързан, неукротим, омаян от има̀не. Понякога в мислите ми се прокрадва онзи спомен. Незабравим момент преди години, много години. Момент, който кара душата ми да се усмихва широко и продължително. Как бих искал пак да съм там и да го преживея отново. Но тогава, някакси, не осъзнавах колко ценен е този миг. Не разбирах привилегията, подарена ми от живота. А сега стоя тук, тук и сега, и копнея за него. Само още веднъж. Само за миг.</p>
-        <p>Но времето ми не търпи дълги копнежи. Бързам напред, защото е мой дълг да не спирам - да правя повече, по-бързо и по-често.
-И докато тичам по късата пътека на живота, вечно забързан и угрижен, не забелязвам как пропускам ценни мигове - тези, които се случват точно сега. Нов момент, нов шанс, нова привилегия. Точно тук, точно в този миг, който някой ден ще ми липсва.
-Затова спирам за кратко, поемам дълбоко дъх и си позволявам просто да бъда тук. Тук и сега.</p>
-         <br>
-         <hr>
-        <h2>Културни светила</h2>
-        <p style="font-size: 8px;">Posted on 19th October 2024</p>
-          <p style="font-size: 8px;">(Influenced by the death of Kiril Marichkov)</p>
-        <p>Културата е жизненоважният орган на организма на една нация, който трябва да се поддържа здрав и защитен. Всяка нация се развива през годините, повлияна от значими исторически събития и културни достижения. Някои събития водят до разруха, а други до положителни промени и стимулират просперитета. Примери за събития с положителен характер включват приемането на декократична политическа система, научни изобретения, архитектурни постижения, раждането на нови литературни стилове или нови тенденции в музиката и изкуството. Всяка глава от историята представя ключови личности, които посвещават живота си на тези промени. Тези важни хора са основна задвижваща сила на един такъв процес. Културната еволюция често бива придружена от изменения в ценностите. Ценностите и културата са, всъщност, основополагащи за всяка една нация.  </p>
-        <p>В книгата "Какво дължим на бъдещето”, Уилям МакАскил говори за ценностите, тяхното съхранение и разглежда значението на това бъдещите поколения да наследят етични и морални ценности. МакАскил обсъжда възможността определени ценности да станат устойчиви във времето, особено с напредъка на обществата в области като технологии, управление и институции. Ако не сме внимателни, вредни или ограничаващи ценности могат да бъдат "заключени" и да продължат дълго време, оказвайки негативно влияние върху бъдещите поколения. МакАскил твърди, че ценностите са крехки и могат да бъдат загубени, ако не се съхраняват активно.</p>
-        <p>Без дълбоко вкоренени ценности и здрава култура, вероятността за просперитет е доста ниска. Наричам ключовите хора, които посвещават живота си на това дело "културни светила”. Такива личности са изключително редки. Не е обичайно да притежаваш таланта и уменията да станеш културно светило, и дори тогава не е сигурно, че ще имаш възможността да се развиеш до такова ниво.
-Затова тези хора са изключително ценни и трябва да бъдат насърчавани. Ние, като общество, трябва да ги разпознаваме и да създаваме условия, които им позволяват да процъфтяват. В крайна сметка, успехът на тяхната работа ще се отрази върху нас. Ние ще пожънем дългосрочните ползи от техните постижения и колективно ще се радваме на плодовете на техния труд. Хората, които принадлежат към тази категория, трябва да бъдат празнувани и подкрепяни. Трябва да ги култивираме и да създаваме условия за развитие на повече таланти, които да допринесат за нашето културно наследство.</p>
-        <p>Следователно, когато такива личности ни напуснат, това е национална трагедия. Наш дълг е да продължим да ги честваме, помним и да запазим плодовете на тяхното творчество. Никога не е сигурно дали във времето ще успеем да съхраним достатъчно културни стила, които да поддържат нашата нация културно здрава. Без тяхното себераздаване и приноси, рискуваме да загубим същността, която поддържа нашата културна жизненост и идентичност.</p>
-         <br>
-         <hr>
-        <h2>Език и общуване</h2>
-        <p style="font-size: 8px;">Posted on 30th August 2024</p>
-        <p>Имах невероятния късмет да израсна на наистина магическо място, заобиколено от чудесни хора. До ден днешен се чувствам изключително привилигирован, че бях част от толкова прекрасна общност, която ми предаде безценни умения и житейски уроци. Но имаше един важен урок, който ми убягна – овладяването на изкуството на комуникацията. Като дете не разбирах напълно значението на силните комуникативни умения. Предполагам, че не бях изложен на достатъчно примери за ясно и въздействащо изказване или просто не успях да го разпозная и разбера. Идеята да се изразявам умело и ясно не ми беше идвала на ум, до много по-късно в живота.
-        <br><br>
-        С напредъка на моята кариера ми стана абсолютно ясно, че комуникацията е също толкова важна в софтуерната индустрия, колкото и самото програмиране. Докато усвояването на програмни езици винаги беше приоритет, скоро осъзнах, че овладяването на човешкия език е също толкова важно. Независимо дали дешифрирам изискванията на клиентите за нова функционалност или обсъждам сложни проблеми с колегите си, силните комуникативни умения се оказаха от съществено значение. Хомогенното разбирането на същността на проблема е в основата ефективните решения. А и по нашите географски ширини е по-характерно да се говори по-малко и да се работи повече. Недостатъчната и неефективна комуникация е доказана рецепта за некачествен продукт. 
-        <br><br>
-        В днешния бързо развиващ се технологичен свят се оформя една вълнуваща нова тенденция - човешкият език става също толкова необходим, колкото и традиционните програмни езици. С нарастването на платформите за програмиране, подпомагани от изкуствен интелект, от програмистите се очаква не само да пишат код, но и да комуникират ефективно с изкуствения интелект. Това представлява голяма промяна, особено за тези от нас, които обикновено се фокусират повече върху кода, отколкото върху разговора. Това е нова концепция, в която овладяването на изкуството на комуникацията е също толкова жизненоважно, колкото и усвояването на синтаксиса и алгоритмите.
-        <br><br>
-        Технологичният пейзаж може да се променя бързо, но основните принципи на софтуерната разработка остават непроменени. Отличното разбиране на програмни алгоритми, добри практики и инфраструктура все още има фундаментално значение. Въпреки това начинът, по който взаимодействаме с кода и системите, се променя и все повече зависи от естествения човешки език. Това, което не се е променило обаче, е необходимостта от ефективна комуникация – независимо дали общуваме с човек или взаимодействаме със софтуер. В този непрекъснато променящ се свят, начинът, по който комуникираме, е също толкова важен, колкото и това, което създаваме.
-    </div>
-</div>
+<body class="crt">
+  <header>
+    <div class="wrap topbar">
+      <div class="brand">
+        <div class="logo" id="blogTitle">BLOG.EXE</div>
+        <div class="hint">LOCAL MODE • JSON FEED • <span id="clock"></span></div>
+      </div>
 
-<footer>
-    <p>Thanks for visiting</p>
-</footer>
+      <div class="controls">
+        <input class="input" id="search" placeholder="SEARCH: title/tag/text..." autocomplete="off" />
+        <select class="select" id="tagFilter">
+          <option value="">ALL TAGS</option>
+        </select>
+        <button class="btn" id="toggleBeep" type="button">BEEP: OFF</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap flicker">
+
+    <!-- PROFILE PANEL (put profile.jpg in the same folder as this HTML) -->
+    <section class="panel" style="margin-bottom:16px">
+      <div class="titlebar">
+        <div>PROFILE.SYS</div>
+        <div class="dots" aria-hidden="true">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+
+      <div class="profile">
+        <img src="./profile.jpg" alt="Profile photo" class="avatar" />
+
+        <div class="profile-text">
+          <div class="name">GEORGI GEORGIEV</div>
+          <div class="tagline">Software • Systems • Thoughts</div>
+
+          <!-- Replace these with your real social links -->
+          <div class="socials">
+            <a href="https://georgiev.cloud/" target="_blank" rel="noopener noreferrer">WEBSITE</a>
+            <a href="https://github.com/USERNAME" target="_blank" rel="noopener noreferrer">GITHUB</a>
+            <a href="https://linkedin.com/in/USERNAME" target="_blank" rel="noopener noreferrer">LINKEDIN</a>
+            <a href="https://twitter.com/USERNAME" target="_blank" rel="noopener noreferrer">X</a>
+            <a href="mailto:you@email.com">EMAIL</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="panel" aria-label="Post list">
+        <div class="titlebar">
+          <div>POSTS.DIR</div>
+          <div class="dots" aria-hidden="true">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+        </div>
+        <div class="list" id="postList"></div>
+        <div class="status">
+          <div id="statusLeft">READY<span class="blink">█</span></div>
+          <div id="statusRight">0 POSTS</div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Post viewer">
+        <div class="titlebar">
+          <div>VIEWER.TXT</div>
+          <div class="dots" aria-hidden="true">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+        </div>
+        <article id="viewer">
+          <h1>LOADING...</h1>
+          <div class="sub">Fetching posts.json...</div>
+          <div class="hr"></div>
+          <pre>Tip: If you opened this file directly (file://), your browser may block fetch(). Run a tiny local server instead.</pre>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const state = {
+      data: null,
+      posts: [],
+      filtered: [],
+      activeId: null,
+      beep: false
+    };
+
+    const el = {
+      blogTitle: document.getElementById("blogTitle"),
+      clock: document.getElementById("clock"),
+      search: document.getElementById("search"),
+      tagFilter: document.getElementById("tagFilter"),
+      toggleBeep: document.getElementById("toggleBeep"),
+      postList: document.getElementById("postList"),
+      viewer: document.getElementById("viewer"),
+      statusLeft: document.getElementById("statusLeft"),
+      statusRight: document.getElementById("statusRight")
+    };
+
+    function tickClock(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,"0");
+      el.clock.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+    setInterval(tickClock, 1000);
+    tickClock();
+
+    function beep(){
+      if (!state.beep) return;
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "square";
+        o.frequency.value = 880;
+        g.gain.value = 0.03;
+        o.connect(g); g.connect(ctx.destination);
+        o.start();
+        setTimeout(() => { o.stop(); ctx.close(); }, 55);
+      }catch(_){}
+    }
+
+    el.toggleBeep.addEventListener("click", () => {
+      state.beep = !state.beep;
+      el.toggleBeep.textContent = `BEEP: ${state.beep ? "ON" : "OFF"}`;
+      beep();
+    });
+
+    function normalise(s){
+      return (s || "").toLowerCase();
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
+    }
+
+    function buildTagOptions(posts){
+      const tags = new Set();
+      posts.forEach(p => (p.tags || []).forEach(t => tags.add(t)));
+      const sorted = [...tags].sort((a,b) => a.localeCompare(b));
+      el.tagFilter.innerHTML =
+        `<option value="">ALL TAGS</option>` +
+        sorted.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t.toUpperCase())}</option>`).join("");
+    }
+
+    function formatDate(iso){
+      // keep it simple and 90s: YYYY-MM-DD
+      return iso || "????-??-??";
+    }
+
+    function applyFilters(){
+      const q = normalise(el.search.value).trim();
+      const tag = el.tagFilter.value;
+
+      state.filtered = state.posts.filter(p => {
+        const hay = [
+          p.title,
+          p.date,
+          ...(p.tags || []),
+          ...(Array.isArray(p.content) ? p.content : [p.content])
+        ].join(" ");
+        const matchQ = !q || normalise(hay).includes(q);
+        const matchTag = !tag || (p.tags || []).includes(tag);
+        return matchQ && matchTag;
+      });
+
+      renderList();
+      el.statusRight.textContent = `${state.filtered.length} / ${state.posts.length} POSTS`;
+    }
+
+    el.search.addEventListener("input", () => applyFilters());
+    el.tagFilter.addEventListener("change", () => { beep(); applyFilters(); });
+
+    function renderList(){
+      const items = state.filtered
+        .slice()
+        .sort((a,b) => (b.date || "").localeCompare(a.date || ""))
+        .map(p => {
+          const active = p.id === state.activeId ? "active" : "";
+          const tags = (p.tags || []).slice(0, 6).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+          return `
+            <button class="item ${active}" data-id="${escapeHtml(p.id)}" type="button">
+              <div>${escapeHtml(p.title || "UNTITLED")}</div>
+              <div class="meta">
+                <span>${escapeHtml(formatDate(p.date))}</span>
+                <span>#${escapeHtml(p.id)}</span>
+              </div>
+              <div class="tags">${tags}</div>
+            </button>
+          `;
+        }).join("");
+
+      el.postList.innerHTML = items || `<div style="padding:12px;color:var(--muted)">NO MATCHES FOUND.</div>`;
+
+      el.postList.querySelectorAll(".item").forEach(btn => {
+        btn.addEventListener("click", () => {
+          beep();
+          const id = btn.getAttribute("data-id");
+          openPost(id);
+        });
+      });
+    }
+
+    function openPost(id){
+      const post = state.posts.find(p => p.id === id) || state.filtered[0];
+      if (!post) return;
+
+      state.activeId = post.id;
+      renderList();
+
+      const tags = (post.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+      const contentLines = Array.isArray(post.content) ? post.content : [post.content];
+      const body = contentLines.map(line => String(line ?? "")).join("\n");
+
+      el.viewer.innerHTML = `
+        <h1>${escapeHtml(post.title || "UNTITLED")}</h1>
+        <div class="sub">
+          <span>DATE: ${escapeHtml(formatDate(post.date))}</span>
+          <span>FILE: ${escapeHtml(post.id)}.TXT</span>
+        </div>
+        <div class="tags" style="padding-bottom:10px">${tags}</div>
+        <div class="hr"></div>
+        <pre>${escapeHtml(body)}</pre>
+      `;
+
+      el.statusLeft.innerHTML = `OPENED: ${escapeHtml(post.id)}<span class="blink">█</span>`;
+      history.replaceState(null, "", `#${encodeURIComponent(post.id)}`);
+    }
+
+    async function load(){
+      try{
+        const res = await fetch("./posts.json", { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        state.data = data;
+        state.posts = Array.isArray(data.posts) ? data.posts : [];
+        el.blogTitle.textContent = data.title || "BLOG.EXE";
+        buildTagOptions(state.posts);
+
+        state.filtered = state.posts.slice();
+        el.statusRight.textContent = `${state.posts.length} POSTS`;
+        renderList();
+
+        const hashId = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+        const first = hashId && state.posts.find(p => p.id === hashId) ? hashId : (state.posts[0]?.id || null);
+        if (first) openPost(first);
+        else {
+          el.viewer.innerHTML = `
+            <h1>EMPTY.DIR</h1>
+            <div class="sub">No posts found in posts.json</div>
+            <div class="hr"></div>
+            <pre>Add items to {"posts":[...]} and reload.</pre>
+          `;
+        }
+      }catch(err){
+        el.viewer.innerHTML = `
+          <h1>ERROR: CANNOT LOAD POSTS.JSON</h1>
+          <div class="sub">Reason: ${escapeHtml(err.message || String(err))}</div>
+          <div class="hr"></div>
+          <pre>
+Most browsers block fetch() from file:// URLs.
+
+Fix:
+- Use a tiny local server in this folder:
+  • Python:  python -m http.server 8000
+  • Node:    npx serve
+Then open:
+  http://localhost:8000
+          </pre>
+        `;
+        el.statusLeft.innerHTML = `ERROR<span class="blink">█</span>`;
+      }
+    }
+
+    load();
+  </script>
 </body>
 </html>
-
